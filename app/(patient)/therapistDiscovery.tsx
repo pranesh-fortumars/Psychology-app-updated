@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: Spacing.xl,
-    boxShadow: '0px 8px 12px rgba(142, 202, 230, 0.2)',
+    boxShadow: '0px 8px 12px rgba(33, 158, 188, 0.2)',
     elevation: 4,
   },
   applyBtnText: {

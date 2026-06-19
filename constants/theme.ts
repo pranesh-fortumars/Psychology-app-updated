@@ -1,12 +1,12 @@
 
 
 export const Colors = {
-  primary: '#8ECAE6', // Refined Sky Blue
-  secondary: '#E0FBFC', // Ice Blue
-  accent: '#F1FAEE', // Mint Cream
-  background: '#FDFCFB',
-  surface: '#FFFFFF',
-  text: '#1B263B', // Deep Navy for better contrast
+  primary: '#219EBC', // Deep Cyan - Premium & Trustworthy
+  secondary: '#8ECAE6', // Light Sky Blue
+  accent: '#E0FBFC', // Very soft ice blue
+  background: '#F8F9FA', // Off-white for better eye comfort
+  surface: '#FFFFFF', // Pure white for cards
+  text: '#023047', // Dark Navy for high legibility
   textLight: '#778DA9',
   border: '#E9ECEF',
   success: '#D8E2DC',
@@ -19,7 +19,7 @@ export const Colors = {
 
 export const Gradients = {
   soft: ['#FDFCFB', '#F1FAEE'],
-  premium: ['#8ECAE6', '#219EBC'],
+  premium: ['#219EBC', '#023047'],
 };
 
 export const Spacing = {
@@ -32,11 +32,11 @@ export const Spacing = {
 
 export const Shadows = {
   soft: {
-    boxShadow: '0px 10px 20px rgba(65, 90, 119, 0.08)',
+    boxShadow: '0px 10px 20px rgba(2, 48, 71, 0.05)',
     elevation: 3,
   },
   glass: {
-    boxShadow: '0px 15px 30px rgba(27, 38, 59, 0.05)',
+    boxShadow: '0px 15px 30px rgba(2, 48, 71, 0.08)',
     elevation: 2,
   }
 };

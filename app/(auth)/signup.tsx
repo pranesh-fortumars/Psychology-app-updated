@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    boxShadow: '0px 10px 20px rgba(142, 202, 230, 0.2)',
+    boxShadow: '0px 10px 20px rgba(33, 158, 188, 0.2)',
     elevation: 5,
   },
   signupButtonText: {
