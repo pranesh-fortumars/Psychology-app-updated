@@ -1,5 +1,19 @@
-
 import { Stack } from "expo-router";
+import { Platform, LogBox } from "react-native";
+
+// Ignore the LogBox warning
+LogBox.ignoreLogs(['props.pointerEvents is deprecated']);
+
+// Suppress the warning in the browser console (coming from third-party libraries)
+if (Platform.OS === 'web') {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('props.pointerEvents is deprecated')) {
+      return;
+    }
+    originalWarn(...args);
+  };
+}
 
 export default function RootLayout() {
   return (
