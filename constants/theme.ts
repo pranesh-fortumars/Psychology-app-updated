@@ -1,20 +1,20 @@
 
 
 export const Colors = {
-  primary: '#219EBC', // Deep Cyan - Premium & Trustworthy
-  secondary: '#8ECAE6', // Light Sky Blue
-  accent: '#E0FBFC', // Very soft ice blue
-  background: '#F8F9FA', // Off-white for better eye comfort
+  primary: '#1D829B', // Deep Cyan - Premium & Trustworthy
+  secondary: '#457B9D', // Darker Sky Blue for better contrast
+  accent: '#BDE0FE', // Slightly more visible ice blue
+  background: '#F0F4F8', // Light slate off-white for depth
   surface: '#FFFFFF', // Pure white for cards
-  text: '#023047', // Dark Navy for high legibility
-  textLight: '#778DA9',
-  border: '#E9ECEF',
-  success: '#D8E2DC',
-  info: '#CAF0F8',
-  warning: '#FFE5D9',
-  star: '#FFB703', // Vivid Amber
+  text: '#011E2D', // Very Dark Navy for extremely high legibility
+  textLight: '#4A607A', // Darkened for better contrast against background
+  border: '#CFD8DC', // Darker border for better card definition
+  success: '#81B29A', // Deeper green for contrast
+  info: '#A8DADC', 
+  warning: '#F4A261', // Deeper orange for contrast
+  star: '#F77F00', // Vivid amber/orange
   pulse: '#A8DADC',
-  shimmer: '#F8F9FA',
+  shimmer: '#E2E8F0',
 };
 
 export const Gradients = {
