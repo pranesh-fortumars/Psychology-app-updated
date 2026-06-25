@@ -1,10 +1,52 @@
-# ClarityMind: Enterprise Mental Health Platform 🍃
-
-ClarityMind is a comprehensive, production-ready healthcare management platform designed specifically for mental health professionals and patients. Built on a modern React Native (Expo) architecture, it offers a seamless, premium cross-platform experience across Mobile and Desktop web views.
+<div align="center">
+  <img src="https://img.shields.io/badge/Platform-React_Native-blue?style=for-the-badge&logo=react" alt="React Native" />
+  <img src="https://img.shields.io/badge/Framework-Expo_Router-black?style=for-the-badge&logo=expo" alt="Expo" />
+  <img src="https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge" alt="Production Ready" />
+  <br />
+  <h1>🍃 ClarityMind</h1>
+  <h3>Enterprise Mental Health & Telehealth Platform</h3>
+  <p><i>A beautiful, responsive, and secure healthcare management ecosystem.</i></p>
+</div>
 
 ---
 
-## 🏗 System Architecture Diagram
+## ✨ Overview
+
+**ClarityMind** is a state-of-the-art mental health platform designed to bridge the gap between patients seeking peace and certified therapists providing care. Built on a universal React Native architecture, it guarantees a seamless, fluid experience whether accessed via a desktop browser or a mobile device.
+
+<details open>
+<summary><b>🔥 Key Capabilities & Modules</b> <i>(Click to collapse)</i></summary>
+
+### 👨‍💼 Administrator Portal
+- **Platform Analytics:** Real-time dashboards monitoring total users, active patients, doctors, and platform revenue.
+- **Security & Maintenance:** Active CRON job logs validating the automated 30-day data retention purge (HIPAA-ready compliance workflows).
+- **Role Management:** Total oversight over all registered users and session histories.
+
+### 🩺 Therapist (Doctor) Portal
+- **Session Intelligence:** Deep insights into upcoming appointments and historical patient data.
+- **Dynamic PDF Reports:** Built-in `expo-print` engine to compile clinical notes, therapy suggestions, and patient status into native, exportable PDF documents.
+- **In-App Notifications:** Real-time push notifications (`expo-notifications`) triggered when accepting or rejecting patient appointment requests.
+- **Feedback Loop:** Direct visibility into 5-star patient ratings and written session reviews.
+
+### 🧘 Patient Portal
+- **Frictionless Onboarding:** Quick access to book sessions based on specialized therapeutic topics.
+- **Session Reviews:** Interactive post-session feedback modules to rate their therapist experience securely.
+- **Wallet & Coin System:** Dummy-integrated recharge flow for booking premium telehealth appointments.
+
+</details>
+
+---
+
+## 🎨 Design Philosophy
+The application utilizes a custom **Oceanic Design System**. 
+> *Constraint-driven design: We strictly avoided dark backgrounds, opting instead for high-contrast slate off-whites, deep navy typography, and vibrant secondary accents to evoke feelings of calm, trust, and professionalism.*
+
+- **Micro-Animations:** Utilizing `react-native-reanimated` (via Expo) for smooth, 60FPS glassmorphic transitions.
+- **Responsive Geometry:** Automatically constrains wide web views to a premium `1024px` centered column while remaining 100% full-width fluid on mobile devices.
+
+---
+
+## 🏗 System Architecture
 
 ```mermaid
 graph TD
@@ -59,37 +101,17 @@ graph TD
 
 ---
 
-## 🌟 Key Features
-
-### 👨‍💼 Administrator Capabilities
-- **Platform Analytics:** Real-time dashboards monitoring total users, active patients, doctors, and platform revenue.
-- **Security & Maintenance:** Active CRON job logs validating the automated 30-day data retention purge (HIPAA-ready compliance workflows).
-- **Role Management:** Total oversight over all registered users and session histories.
-
-### 🩺 Therapist (Doctor) Capabilities
-- **Session Intelligence:** Deep insights into upcoming appointments and historical patient data.
-- **Dynamic PDF Reports:** Built-in `expo-print` engine to compile clinical notes, therapy suggestions, and patient status into native, exportable PDF documents.
-- **In-App Notifications:** Real-time push notifications (`expo-notifications`) triggered when accepting or rejecting patient appointment requests.
-- **Feedback Loop:** Direct visibility into 5-star patient ratings and written session reviews.
-
-### 🧘 Patient Capabilities
-- **Frictionless Onboarding:** Quick access to book sessions based on specialized therapeutic topics.
-- **Session Reviews:** Interactive post-session feedback modules to rate their therapist experience securely.
-- **Wallet & Coin System:** Dummy-integrated recharge flow for booking premium telehealth appointments.
+## 🔒 Security & Compliance
+- **Data Retention Policies:** Automated sweeping of stale sessions older than 30 days to strictly adhere to platform privacy agreements.
+- **Role-Based Access Control (RBAC):** Strict navigation barriers preventing unauthorized module access (e.g., Doctors cannot access the global Admin Analytics).
 
 ---
 
-## 🛠 Technology Stack
-- **Framework:** React Native / Expo (Universal App for iOS, Android, and Web)
-- **Styling:** Custom "Oceanic" Design System (High-contrast, Accessible, Responsive)
-- **Routing:** Expo Router (File-based navigation)
-- **Native Modules:** 
-  - `expo-print` & `expo-sharing` (Report Generation)
-  - `expo-notifications` (Event Triggers)
-  - `@expo/vector-icons` (UI Components)
-- **Backend Architecture:** Robust Service-Oriented Architecture (`dataService.ts`) mimicking Firebase/Supabase real-time NoSQL snapshot workflows.
-
----
+## 🚀 Roadmap (Upcoming Enterprise Migration)
+- [ ] Migrate `dataService.ts` state to **Firebase Firestore**.
+- [ ] Integrate **Stripe API** for live patient wallet top-ups.
+- [ ] Deploy **WebRTC** for in-app secure video consultations.
+- [ ] Implement **Multi-Factor Authentication (MFA)** for all Administrator accounts.
 
 > Edited for use in IDX on 07/09/12
 
