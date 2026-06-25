@@ -102,6 +102,9 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: Spacing.xl,
         justifyContent: 'center',
+        width: '100%',
+        maxWidth: 480,
+        alignSelf: 'center',
     },
     header: {
         alignItems: 'center',

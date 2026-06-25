@@ -180,6 +180,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Spacing.xl,
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
     paddingTop: 60,
   },
   header: {
