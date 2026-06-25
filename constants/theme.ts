@@ -45,4 +45,15 @@ export const ClinicalCategories = {
   consultant: ['Anxiety', 'Angry', 'Management', 'AD.HD', 'Depression', 'OCD', 'Autism'],
   lifeStages: ['Couple conservative', 'Children 6-10 age', 'Family', 'Teens', 'Work'],
   speciality: ['Sex', 'Traumatized', 'DPD', 'LGBTQ+'],
+  topics: [
+    'Stress and anxiety',
+    'Relationship',
+    'Family issues',
+    'School and students',
+    'Career and work',
+    'Sleep problem',
+    'Anger issues',
+    'Personal growth',
+    'General counselling'
+  ],
 };

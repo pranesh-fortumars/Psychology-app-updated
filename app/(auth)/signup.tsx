@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Colors, Shadows, Spacing } from '../../constants/theme';
+import { ClinicalCategories, Colors, Shadows, Spacing } from '../../constants/theme';
 import { dataService } from '../../services/dataService';
 import AnimatedEntrance from '../_components/AnimatedEntrance';
 
@@ -11,8 +11,17 @@ export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const toggleTopic = (topic: string) => {
+    if (selectedTopics.includes(topic)) {
+      setSelectedTopics(selectedTopics.filter(t => t !== topic));
+    } else {
+      setSelectedTopics([...selectedTopics, topic]);
+    }
+  };
 
   const handleSignup = async () => {
     if (!name || !email || !password) {
@@ -22,7 +31,7 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      const success = await dataService.signup(name, email, password, 'patient');
+      const success = await dataService.signup(name, email, password, 'patient', selectedTopics);
       if (success) {
         Alert.alert("Welcome!", "Your mental health journey starts here.");
         router.replace('/(auth)/login');
@@ -102,6 +111,27 @@ export default function Signup() {
                     secureTextEntry
                     placeholderTextColor={Colors.textLight}
                   />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>What brings you here? (Optional)</Text>
+                <View style={styles.chipGrid}>
+                  {ClinicalCategories.topics.map((topic) => (
+                    <TouchableOpacity
+                      key={topic}
+                      style={StyleSheet.flatten([
+                        styles.chip,
+                        selectedTopics.includes(topic) && styles.activeChip
+                      ])}
+                      onPress={() => toggleTopic(topic)}
+                    >
+                      <Text style={StyleSheet.flatten([
+                        styles.chipText,
+                        selectedTopics.includes(topic) && styles.activeChipText
+                      ])}>{topic}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
 
@@ -233,6 +263,33 @@ const styles = StyleSheet.create({
   signupButtonText: {
     color: Colors.surface,
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  chipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  activeChip: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  chipText: {
+    fontSize: 13,
+    color: Colors.text,
+    fontWeight: '500',
+  },
+  activeChipText: {
+    color: Colors.surface,
     fontWeight: 'bold',
   },
   footer: {

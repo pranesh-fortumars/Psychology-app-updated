@@ -62,6 +62,16 @@ export default function PatientProfile() {
               <Text style={styles.patientName}>{patient.name}</Text>
               <Text style={styles.patientEmail}>{patient.email}</Text>
 
+              {patient.topics && patient.topics.length > 0 && (
+                <View style={styles.topicsRow}>
+                  {patient.topics.map((t: string) => (
+                    <View key={t} style={styles.topicChip}>
+                      <Text style={styles.topicText}>{t}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
               <View style={styles.coinBadge}>
                 <Ionicons name="wallet" size={16} color={Colors.text} />
                 <Text style={styles.coinBalanceText}>{coinBalance} Credits</Text>
@@ -124,7 +134,25 @@ const styles = StyleSheet.create({
   patientEmail: {
     fontSize: 16,
     color: Colors.textLight,
+    marginBottom: Spacing.sm,
+  },
+  topicsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 6,
     marginBottom: Spacing.md,
+  },
+  topicChip: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  topicText: {
+    fontSize: 12,
+    color: Colors.text,
+    fontWeight: '600',
   },
   coinBadge: {
     flexDirection: 'row',

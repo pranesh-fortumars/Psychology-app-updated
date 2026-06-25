@@ -18,7 +18,9 @@ import { ClinicalCategories, Colors, Shadows, Spacing } from '../../constants/th
 import { dataService, User } from '../../services/dataService';
 
 export default function AdminUserManagement() {
+  const [activeTab, setActiveTab] = useState<'consultants' | 'patients'>('consultants');
   const [doctors, setDoctors] = useState<User[]>([]);
+  const [patients, setPatients] = useState<User[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [newDocName, setNewDocName] = useState('');
   const [newDocEmail, setNewDocEmail] = useState('');
@@ -28,12 +30,12 @@ export default function AdminUserManagement() {
   const [selectedTherapies, setSelectedTherapies] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchDoctors();
+    fetchUsers();
   }, []);
 
-  const fetchDoctors = () => {
-    const list = dataService.getTherapists();
-    setDoctors(list);
+  const fetchUsers = () => {
+    setDoctors(dataService.getTherapists());
+    setPatients(dataService.getPatients());
   };
 
   const toggleSelection = (list: string[], setList: any, item: string) => {
@@ -65,7 +67,7 @@ export default function AdminUserManagement() {
     setSelectedConsultants([]);
     setSelectedLifeStages([]);
     setSelectedTherapies([]);
-    fetchDoctors();
+    fetchUsers();
   };
 
   const MultiSelectSection = ({ title, options, selected, onToggle }: any) => (
@@ -110,6 +112,26 @@ export default function AdminUserManagement() {
     </View>
   );
 
+  const renderPatientItem = ({ item }: { item: User }) => (
+    <View style={StyleSheet.flatten([styles.card, Shadows.glass])}>
+      <View style={styles.cardInfo}>
+        <Text style={styles.docName}>{item.name}</Text>
+        <Text style={styles.docEmail}>{item.email}</Text>
+        <Text style={{fontSize: 12, color: Colors.text, marginTop: 4, fontWeight: '500'}}>Balance: {item.coins || 0} Coins</Text>
+        <View style={styles.tagRow}>
+          {item.topics?.map(topic => (
+            <View key={topic} style={styles.tag}>
+              <Text style={styles.tagText}>{topic}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+      <View style={StyleSheet.flatten([styles.roleBadge, {backgroundColor: Colors.accent}])}>
+        <Text style={styles.roleText}>PATIENT</Text>
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -126,11 +148,31 @@ export default function AdminUserManagement() {
       </View>
 
       <FlatList
-        data={doctors}
-        renderItem={renderDoctorItem}
+        data={activeTab === 'consultants' ? doctors : patients}
+        renderItem={activeTab === 'consultants' ? renderDoctorItem : renderPatientItem}
         keyExtractor={(item: User) => item.id.toString()}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={<Text style={styles.sectionTitle}>Active Clinical Registry</Text>}
+        ListHeaderComponent={
+          <>
+            <View style={styles.tabBar}>
+              <TouchableOpacity
+                style={StyleSheet.flatten([styles.tab, activeTab === 'consultants' && styles.activeTab])}
+                onPress={() => setActiveTab('consultants')}
+              >
+                <Text style={[styles.tabLabel, activeTab === 'consultants' && styles.activeTabLabel]}>Consultants</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={StyleSheet.flatten([styles.tab, activeTab === 'patients' && styles.activeTab])}
+                onPress={() => setActiveTab('patients')}
+              >
+                <Text style={[styles.tabLabel, activeTab === 'patients' && styles.activeTabLabel]}>Patients</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.sectionTitle}>
+              {activeTab === 'consultants' ? 'Active Clinical Registry' : 'Patient Registry'}
+            </Text>
+          </>
+        }
       />
 
       <Modal visible={isModalVisible} animationType="slide" transparent>
@@ -236,6 +278,31 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: Spacing.lg,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.background,
+    borderRadius: 16,
+    padding: 4,
+    marginBottom: Spacing.md,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  activeTab: {
+    backgroundColor: Colors.surface,
+  },
+  tabLabel: {
+    fontSize: 14,
+    color: Colors.textLight,
+    fontWeight: '600',
+  },
+  activeTabLabel: {
+    color: Colors.text,
+    fontWeight: 'bold',
   },
   sectionTitle: {
     fontSize: 18,

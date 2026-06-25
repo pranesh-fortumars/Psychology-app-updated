@@ -148,6 +148,15 @@ export default function DoctorSessions() {
               </View>
               <Text style={styles.heroName}>{selectedSession?.patientName}</Text>
               <Text style={styles.heroSub}>{selectedSession?.date.toDateString()} • {selectedSession?.time}</Text>
+              {selectedSession?.patientTopics && selectedSession.patientTopics.length > 0 && (
+                <View style={styles.heroTags}>
+                  {selectedSession.patientTopics.map(t => (
+                    <View key={t} style={styles.heroTag}>
+                      <Text style={styles.heroTagText}>{t}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             <View style={styles.inputSection}>
@@ -428,6 +437,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textLight,
     marginTop: 4,
+  },
+  heroTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  heroTag: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  heroTagText: {
+    fontSize: 11,
+    color: Colors.text,
+    fontWeight: '600',
   },
   inputSection: {
     marginBottom: Spacing.xl,

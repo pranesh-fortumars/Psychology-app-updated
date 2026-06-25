@@ -13,6 +13,7 @@ export interface User {
     consultantCategory?: string[]; // Anxiety, OCD, etc.
     lifeStages?: string[]; // Teens, Family, etc.
     specialityTherapies?: string[]; // Traumatized, LGBTQ+, etc.
+    topics?: string[]; // Patient areas of focus
 }
 
 export interface Session {
@@ -29,6 +30,7 @@ export interface Session {
     report?: string;
     suggestions?: string;
     rating?: number;
+    patientTopics?: string[];
 }
 
 // Initial Mock Data
@@ -60,7 +62,7 @@ let users: User[] = [
         lifeStages: ['Work', 'Teens'],
         specialityTherapies: ['LGBTQ+']
     },
-    { id: 'pat-1', name: 'John Doe', email: 'john@example.com', role: 'patient', coins: 1500 },
+    { id: 'pat-1', name: 'John Doe', email: 'john@example.com', role: 'patient', coins: 1500, topics: ['Stress and anxiety', 'Sleep problem'] },
 ];
 
 let sessions: Session[] = [
@@ -72,7 +74,8 @@ let sessions: Session[] = [
         patientName: 'John Doe',
         date: new Date(Date.now() + 86400000), // Tomorrow
         time: '10:00 AM',
-        status: 'scheduled'
+        status: 'scheduled',
+        patientTopics: ['Stress and anxiety', 'Sleep problem']
     },
     {
         id: 's-2',
@@ -84,7 +87,8 @@ let sessions: Session[] = [
         time: '2:00 PM',
         status: 'completed',
         feedback: 'Very calm session.',
-        rating: 5
+        rating: 5,
+        patientTopics: ['Stress and anxiety', 'Sleep problem']
     },
     {
         id: 's-3',
@@ -96,7 +100,8 @@ let sessions: Session[] = [
         time: '11:00 AM',
         status: 'completed',
         feedback: 'Helpful coping strategies.',
-        rating: 4
+        rating: 4,
+        patientTopics: ['Stress and anxiety', 'Sleep problem']
     }
 ];
 
@@ -139,6 +144,10 @@ class DataService {
     }
 
     // --- Patient Features ---
+    getPatients() {
+        return users.filter(u => u.role === 'patient');
+    }
+
     getTherapists(filters?: {
         language?: string;
         search?: string;
@@ -204,6 +213,7 @@ class DataService {
             therapistId,
             therapistName: therapist.name,
             patientName: patient.name,
+            patientTopics: patient.topics || [],
             date,
             time,
             status: 'scheduled'
@@ -247,7 +257,7 @@ class DataService {
         return user || null;
     }
 
-    async signup(name: string, email: string, password: string, role: 'patient' | 'doctor' | 'admin') {
+    async signup(name: string, email: string, password: string, role: 'patient' | 'doctor' | 'admin', topics?: string[]) {
         const exists = users.find(u => u.email === email);
         if (exists) return false;
 
@@ -256,6 +266,7 @@ class DataService {
             name,
             email,
             role,
+            topics: topics || [],
             coins: role === 'patient' ? 500 : undefined, // Start with some free coins
             languages: role === 'doctor' ? ['English'] : undefined,
             rating: role === 'doctor' ? 0 : undefined,
