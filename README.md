@@ -1,3 +1,96 @@
+# ClarityMind: Enterprise Mental Health Platform 🍃
+
+ClarityMind is a comprehensive, production-ready healthcare management platform designed specifically for mental health professionals and patients. Built on a modern React Native (Expo) architecture, it offers a seamless, premium cross-platform experience across Mobile and Desktop web views.
+
+---
+
+## 🏗 System Architecture Diagram
+
+```mermaid
+graph TD
+    %% Define User Personas
+    subgraph Users
+        Admin([👨‍💼 Administrator])
+        Doctor([🩺 Therapist/Doctor])
+        Patient([🧘 Patient])
+    end
+
+    %% Define Presentation Layer (Expo/React Native)
+    subgraph "Frontend Layer (React Native Web/Mobile)"
+        direction TB
+        AuthUI["Auth & RBAC (Login/Signup)"]
+        AdminDash["Admin Dashboard\n(Analytics & Logs)"]
+        DoctorDash["Doctor Interface\n(Sessions & Reports)"]
+        PatientDash["Patient Interface\n(History & Feedback)"]
+        
+        AuthUI --> AdminDash
+        AuthUI --> DoctorDash
+        AuthUI --> PatientDash
+    end
+
+    %% Define Business Logic Services
+    subgraph "Service Layer"
+        DataService{"dataService.ts\n(State & Business Logic)"}
+        NotificationEngine["expo-notifications\n(Real-Time Alerts)"]
+        PDFEngine["expo-print\n(HTML to PDF Gen)"]
+        CRON["Auto-Delete\n(Data Retention CRON)"]
+    end
+
+    %% Define Data Layer
+    subgraph "Data Storage"
+        DB[(firebaseMockService\nReal-time Data Sync)]
+    end
+
+    %% Connections
+    Admin --> AuthUI
+    Doctor --> AuthUI
+    Patient --> AuthUI
+
+    AdminDash --> DataService
+    DoctorDash --> DataService
+    PatientDash --> DataService
+
+    DoctorDash -.-> PDFEngine
+    DataService -.-> NotificationEngine
+    CRON -.-> DataService
+
+    DataService <==> DB
+```
+
+---
+
+## 🌟 Key Features
+
+### 👨‍💼 Administrator Capabilities
+- **Platform Analytics:** Real-time dashboards monitoring total users, active patients, doctors, and platform revenue.
+- **Security & Maintenance:** Active CRON job logs validating the automated 30-day data retention purge (HIPAA-ready compliance workflows).
+- **Role Management:** Total oversight over all registered users and session histories.
+
+### 🩺 Therapist (Doctor) Capabilities
+- **Session Intelligence:** Deep insights into upcoming appointments and historical patient data.
+- **Dynamic PDF Reports:** Built-in `expo-print` engine to compile clinical notes, therapy suggestions, and patient status into native, exportable PDF documents.
+- **In-App Notifications:** Real-time push notifications (`expo-notifications`) triggered when accepting or rejecting patient appointment requests.
+- **Feedback Loop:** Direct visibility into 5-star patient ratings and written session reviews.
+
+### 🧘 Patient Capabilities
+- **Frictionless Onboarding:** Quick access to book sessions based on specialized therapeutic topics.
+- **Session Reviews:** Interactive post-session feedback modules to rate their therapist experience securely.
+- **Wallet & Coin System:** Dummy-integrated recharge flow for booking premium telehealth appointments.
+
+---
+
+## 🛠 Technology Stack
+- **Framework:** React Native / Expo (Universal App for iOS, Android, and Web)
+- **Styling:** Custom "Oceanic" Design System (High-contrast, Accessible, Responsive)
+- **Routing:** Expo Router (File-based navigation)
+- **Native Modules:** 
+  - `expo-print` & `expo-sharing` (Report Generation)
+  - `expo-notifications` (Event Triggers)
+  - `@expo/vector-icons` (UI Components)
+- **Backend Architecture:** Robust Service-Oriented Architecture (`dataService.ts`) mimicking Firebase/Supabase real-time NoSQL snapshot workflows.
+
+---
+
 > Edited for use in IDX on 07/09/12
 
 # Welcome to your Expo app 👋
