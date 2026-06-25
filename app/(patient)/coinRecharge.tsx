@@ -14,12 +14,22 @@ const PACKAGES = [
 
 export default function CoinRecharge() {
   const [balance, setBalance] = useState(1500);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingPkg, setProcessingPkg] = useState<string | null>(null);
   const patientId = 'pat-1';
 
-  const handleRecharge = (amount: number) => {
-    const newBalance = dataService.rechargeCoins(patientId, amount);
-    setBalance(newBalance);
-    Alert.alert("Success", `${amount} coins added to your wallet.`);
+  const handleRecharge = (pkgId: string, amount: number) => {
+    setProcessingPkg(pkgId);
+    setIsProcessing(true);
+
+    // Simulate Payment Gateway processing time
+    setTimeout(() => {
+      const newBalance = dataService.rechargeCoins(patientId, amount);
+      setBalance(newBalance);
+      setIsProcessing(false);
+      setProcessingPkg(null);
+      Alert.alert("Payment Successful", `Dummy Gateway processed payment. ${amount} coins added to your wallet!`);
+    }, 1500);
   };
 
   return (
@@ -38,8 +48,14 @@ export default function CoinRecharge() {
         {PACKAGES.map((pkg) => (
           <TouchableOpacity
             key={pkg.id}
-            style={[styles.pkgCard, pkg.popular && styles.popularCard, Shadows.soft]}
-            onPress={() => handleRecharge(pkg.coins)}
+            style={[
+              styles.pkgCard, 
+              pkg.popular && styles.popularCard, 
+              isProcessing && processingPkg !== pkg.id && { opacity: 0.5 },
+              Shadows.soft
+            ]}
+            onPress={() => handleRecharge(pkg.id, pkg.coins)}
+            disabled={isProcessing}
           >
             {pkg.popular && (
               <View style={styles.popularBadge}>
@@ -53,8 +69,10 @@ export default function CoinRecharge() {
               <Text style={styles.pkgTitle}>{pkg.coins} Coins</Text>
               <Text style={styles.pkgSubtitle}>Premium Session Credits</Text>
             </View>
-            <View style={styles.priceTag}>
-              <Text style={styles.priceText}>{pkg.price}</Text>
+            <View style={StyleSheet.flatten([styles.priceTag, processingPkg === pkg.id && { backgroundColor: Colors.primary }])}>
+              <Text style={StyleSheet.flatten([styles.priceText, processingPkg === pkg.id && { color: Colors.surface }])}>
+                {processingPkg === pkg.id ? 'Wait...' : pkg.price}
+              </Text>
             </View>
           </TouchableOpacity>
         ))}
