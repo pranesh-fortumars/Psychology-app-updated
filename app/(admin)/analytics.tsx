@@ -1,17 +1,18 @@
 
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Colors, Shadows, Spacing } from '../../constants/theme';
-
-const dummyAnalytics = {
-  users: { total: 1540, patients: 1210, doctors: 330 },
-  sessions: { total: 4520, completed: 4230, canceled: 290 },
-  revenue: { total: '₹54K', lastMonth: '₹12K', lastWeek: '₹3K' },
-};
+import { dataService } from '../../services/dataService';
 
 export default function Analytics() {
-  const [analytics] = useState(dummyAnalytics);
+  const [analytics, setAnalytics] = useState(dataService.getSystemAnalytics());
+  const [logs, setLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    setAnalytics(dataService.getSystemAnalytics());
+    setLogs(dataService.getAutoDeleteLogs());
+  }, []);
 
   const StatCard = ({ title, value, icon, color }: { title: string, value: string | number, icon: any, color: string }) => (
     <View style={[styles.card, Shadows.soft]}>
@@ -72,6 +73,23 @@ export default function Analytics() {
                 <Text style={styles.subValue}>{analytics.revenue.lastWeek}</Text>
               </View>
             </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Security & Maintenance</Text>
+          <View style={[styles.logsCard, Shadows.soft]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <Ionicons name="shield-checkmark" size={20} color={Colors.warning} />
+              <Text style={{ marginLeft: 8, fontWeight: 'bold', color: Colors.text }}>Data Retention CRON Logs</Text>
+            </View>
+            {logs.length === 0 ? (
+              <Text style={{ color: Colors.textLight, fontSize: 13 }}>System is clean. No records permanently deleted yet.</Text>
+            ) : (
+              logs.map((log, i) => (
+                <Text key={i} style={{ color: Colors.warning, marginBottom: 8, fontSize: 12 }}>{log}</Text>
+              ))
+            )}
           </View>
         </View>
       </ScrollView>
@@ -204,4 +222,12 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginTop: 4,
   },
+  logsCard: {
+    backgroundColor: Colors.surface,
+    padding: Spacing.xl,
+    borderRadius: 24,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  }
 });

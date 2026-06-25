@@ -4,10 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Modal, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Colors, Shadows, Spacing } from '../../constants/theme';
 import { dataService, Session } from '../../services/dataService';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 
 export default function DoctorSessions() {
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [activeTab, setActiveTab] = useState<'scheduled' | 'completed'>('scheduled');
+  const [activeTab, setActiveTab] = useState<'pending' | 'scheduled' | 'completed'>('scheduled');
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [reportText, setReportText] = useState('');
@@ -16,13 +18,20 @@ export default function DoctorSessions() {
 
   useEffect(() => {
     const list = dataService.getDoctorSessions(doctorId);
-    const filtered = list.filter(s => s.status === (activeTab as any));
+    const filtered = list.filter((s: Session) => s.status === (activeTab as any));
     if (searchQuery) {
-      setSessions(filtered.filter(s => s.patientName.toLowerCase().includes(searchQuery.toLowerCase())));
+      setSessions(filtered.filter((s: Session) => s.patientName.toLowerCase().includes(searchQuery.toLowerCase())));
     } else {
       setSessions(filtered);
     }
   }, [activeTab, searchQuery]);
+
+  const handleStatusChange = (id: string, newStatus: any) => {
+    dataService.updateSessionDetails(id, { status: newStatus });
+    // Refetch
+    const list = dataService.getDoctorSessions(doctorId);
+    setSessions(list.filter((s: Session) => s.status === activeTab));
+  };
 
   const handleUpdateSession = () => {
     if (selectedSession) {
@@ -35,7 +44,58 @@ export default function DoctorSessions() {
       setSelectedSession(null);
       // Refresh list
       const list = dataService.getDoctorSessions(doctorId);
-      setSessions(list.filter(s => s.status === activeTab));
+      setSessions(list.filter((s: Session) => s.status === activeTab));
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    if (!selectedSession) return;
+    try {
+      const html = `
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+              h1 { color: #2A4365; }
+              .header { border-bottom: 2px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 30px; }
+              .section { margin-bottom: 20px; }
+              .label { font-weight: bold; color: #4A5568; }
+              .content { margin-top: 5px; padding: 15px; background-color: #F7FAFC; border-radius: 8px; line-height: 1.5; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>ClarityMind Clinical Report</h1>
+              <p>Confidential Patient Assessment</p>
+            </div>
+            
+            <div class="section">
+              <p><span class="label">Patient Name:</span> ${selectedSession.patientName}</p>
+              <p><span class="label">Date:</span> ${new Date(selectedSession.date).toDateString()} at ${selectedSession.time}</p>
+            </div>
+
+            <div class="section">
+              <p class="label">Clinical Observations & Progress:</p>
+              <div class="content">${reportText || selectedSession.report || 'No clinical notes recorded.'}</div>
+            </div>
+
+            <div class="section">
+              <p class="label">Patient Guidance / Suggestions:</p>
+              <div class="content">${suggestionText || selectedSession.suggestions || 'No guidance recorded.'}</div>
+            </div>
+            
+            <p style="margin-top: 50px; font-size: 12px; color: #A0AEC0; text-align: center;">Generated securely by ClarityMind Platform</p>
+          </body>
+        </html>
+      `;
+      const { uri } = await Print.printToFileAsync({ html });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert("Success", "PDF generated, but sharing is not available on this device.");
+      }
+    } catch (err) {
+      Alert.alert("Error", "Could not generate PDF report.");
     }
   };
 
@@ -73,6 +133,15 @@ export default function DoctorSessions() {
             <Ionicons name="checkmark-done" size={12} color={Colors.text} />
             <Text style={styles.statusBadgeText}>Done</Text>
           </View>
+        ) : item.status === 'pending' || item.status === 'Pending' as any ? (
+          <View style={{flexDirection: 'row', gap: 8}}>
+            <TouchableOpacity style={styles.rejectBtn} onPress={() => handleStatusChange(item.id, 'rejected')}>
+              <Text style={styles.rejectText}>Reject</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.acceptBtn} onPress={() => handleStatusChange(item.id, 'scheduled')}>
+              <Text style={styles.acceptText}>Accept</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <TouchableOpacity style={styles.actionLink}>
             <Text style={styles.actionLinkText}>Details</Text>
@@ -100,6 +169,12 @@ export default function DoctorSessions() {
         </View>
 
         <View style={styles.tabBar}>
+          <TouchableOpacity
+            style={StyleSheet.flatten([styles.tab, activeTab === 'pending' && styles.activeTab])}
+            onPress={() => setActiveTab('pending')}
+          >
+            <Text style={[styles.tabLabel, activeTab === 'pending' && styles.activeTabLabel]}>Requests</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={StyleSheet.flatten([styles.tab, activeTab === 'scheduled' && styles.activeTab])}
             onPress={() => setActiveTab('scheduled')}
@@ -207,6 +282,13 @@ export default function DoctorSessions() {
                   </View>
                 </View>
               </View>
+            )}
+
+            {selectedSession?.status === 'completed' && (
+              <TouchableOpacity onPress={handleGeneratePDF} style={styles.pdfBtn}>
+                <Ionicons name="document-text-outline" size={18} color={Colors.surface} />
+                <Text style={styles.pdfBtnText}>Export PDF Report</Text>
+              </TouchableOpacity>
             )}
 
             <View style={{ height: 40 }} />
@@ -368,6 +450,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.primary,
   },
+  acceptBtn: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  acceptText: {
+    color: Colors.surface,
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  rejectBtn: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  rejectText: {
+    color: Colors.textLight,
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
   emptyState: {
     alignItems: 'center',
     marginTop: 100,
@@ -506,6 +612,21 @@ const styles = StyleSheet.create({
   starsRow: {
     flexDirection: 'row',
     marginTop: 12,
+  },
+  pdfBtn: {
+    backgroundColor: Colors.secondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 14,
+    marginTop: Spacing.xl,
+    gap: 8,
+  },
+  pdfBtnText: {
+    color: Colors.surface,
+    fontWeight: 'bold',
+    fontSize: 15,
   },
   closeModal: {
     padding: 4,

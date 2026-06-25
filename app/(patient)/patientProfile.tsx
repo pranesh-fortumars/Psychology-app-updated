@@ -1,39 +1,67 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { FlatList, SafeAreaView, StyleSheet, Text, View, Modal, TouchableOpacity, TextInput, Alert } from "react-native";
 import { Colors, Shadows, Spacing } from "../../constants/theme";
-import { authService, paymentService, sessionService } from "../../services";
+import { dataService, Session } from "../../services/dataService";
 
 export default function PatientProfile() {
   const [patient, setPatient] = useState<any>(null);
-  const [coinBalance, setCoinBalance] = useState<number>(0);
-  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
+  const [sessionHistory, setSessionHistory] = useState<Session[]>([]);
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [rating, setRating] = useState(0);
+  const [feedbackText, setFeedbackText] = useState('');
+
+  const fetchProfile = async () => {
+    const user = await dataService.login("john@example.com");
+    if (user) {
+      setPatient(user);
+      const sessions = dataService.getPatientSessions(user.id);
+      setSessionHistory(sessions);
+    }
+  };
 
   useEffect(() => {
-    // In a real app, you would get the user's ID from your auth context
-    const userId = "patient-123";
-
-    authService.login("patient@example.com", "password").then(setPatient);
-    paymentService.getCoinBalance(userId).then((data) => setCoinBalance(data.balance));
-
-    // Cast to any to bypass the union type mismatch with setSessionHistory
-    sessionService.getSessions("patient", userId).then((res: any) => {
-      setSessionHistory(Array.isArray(res) ? res : []);
-    });
+    fetchProfile();
   }, []);
 
-  const renderSession = ({ item }: { item: any }) => (
+  const handleOpenFeedback = (session: Session) => {
+    setSelectedSession(session);
+    setRating(session.rating || 0);
+    setFeedbackText(session.feedback || '');
+    setFeedbackModalVisible(true);
+  };
+
+  const handleSubmitFeedback = () => {
+    if (selectedSession && rating > 0) {
+      dataService.updateSessionDetails(selectedSession.id, { rating, feedback: feedbackText });
+      Alert.alert("Feedback Submitted", "Thank you for rating your session!");
+      setFeedbackModalVisible(false);
+      fetchProfile();
+    } else {
+      Alert.alert("Error", "Please provide a star rating.");
+    }
+  };
+
+  const renderSession = ({ item }: { item: Session }) => (
     <View style={[styles.sessionCard, Shadows.soft]}>
       <View style={styles.sessionIcon}>
         <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
       </View>
       <View style={styles.sessionInfo}>
         <Text style={styles.sessionTherapist}>{item.therapistName}</Text>
-        <Text style={styles.sessionDate}>{item.date}</Text>
+        <Text style={styles.sessionDate}>{new Date(item.date).toLocaleDateString()} • {item.time}</Text>
       </View>
-      <View style={[styles.statusBadge, { backgroundColor: item.status === 'Completed' ? Colors.success : Colors.accent }]}>
-        <Text style={styles.statusText}>{item.status}</Text>
+      <View style={{ alignItems: 'flex-end', gap: 8 }}>
+        <View style={[styles.statusBadge, { backgroundColor: item.status === 'completed' ? Colors.success : Colors.accent }]}>
+          <Text style={styles.statusText}>{item.status}</Text>
+        </View>
+        {item.status === 'completed' && !item.feedback && (
+          <TouchableOpacity style={styles.rateBtn} onPress={() => handleOpenFeedback(item)}>
+            <Text style={styles.rateBtnText}>Rate Session</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -74,7 +102,7 @@ export default function PatientProfile() {
 
               <View style={styles.coinBadge}>
                 <Ionicons name="wallet" size={16} color={Colors.text} />
-                <Text style={styles.coinBalanceText}>{coinBalance} Credits</Text>
+                <Text style={styles.coinBalanceText}>{patient.coins || 0} Credits</Text>
               </View>
             </View>
             <Text style={styles.sectionTitle}>Session History</Text>
@@ -86,6 +114,41 @@ export default function PatientProfile() {
           </View>
         }
       />
+
+      <Modal visible={feedbackModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Rate Your Session</Text>
+              <TouchableOpacity onPress={() => setFeedbackModalVisible(false)}>
+                <Ionicons name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalSubtitle}>How was your session with {selectedSession?.therapistName}?</Text>
+            
+            <View style={styles.starsContainer}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity key={star} onPress={() => setRating(star)}>
+                  <Ionicons name={star <= rating ? "star" : "star-outline"} size={36} color={Colors.star} style={{ marginHorizontal: 4 }} />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TextInput
+              style={styles.textArea}
+              placeholder="Write an optional review..."
+              multiline
+              value={feedbackText}
+              onChangeText={setFeedbackText}
+              placeholderTextColor={Colors.textLight}
+            />
+
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmitFeedback}>
+              <Text style={styles.submitBtnText}>Submit Feedback</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -224,5 +287,71 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: Colors.textLight,
+  },
+  rateBtn: {
+    backgroundColor: Colors.star,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  rateBtnText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: Colors.surface,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: Spacing.xl,
+    minHeight: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.text,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: Colors.textLight,
+    marginBottom: Spacing.xl,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+  },
+  textArea: {
+    backgroundColor: Colors.background,
+    borderRadius: 16,
+    padding: Spacing.lg,
+    height: 120,
+    textAlignVertical: 'top',
+    marginBottom: Spacing.xl,
+    color: Colors.text,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  submitBtn: {
+    backgroundColor: Colors.primary,
+    padding: Spacing.lg,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  submitBtnText: {
+    color: Colors.surface,
+    fontWeight: 'bold',
+    fontSize: 16,
   }
 });

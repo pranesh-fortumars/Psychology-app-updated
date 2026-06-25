@@ -1,4 +1,5 @@
 
+import * as Notifications from 'expo-notifications';
 
 export interface User {
     id: string;
@@ -24,7 +25,7 @@ export interface Session {
     patientName: string;
     date: Date;
     time: string;
-    status: 'scheduled' | 'completed' | 'canceled';
+    status: 'pending' | 'scheduled' | 'completed' | 'canceled' | 'rejected';
     notes?: string;
     feedback?: string;
     report?: string;
@@ -74,7 +75,7 @@ let sessions: Session[] = [
         patientName: 'John Doe',
         date: new Date(Date.now() + 86400000), // Tomorrow
         time: '10:00 AM',
-        status: 'scheduled',
+        status: 'pending',
         patientTopics: ['Stress and anxiety', 'Sleep problem']
     },
     {
@@ -106,6 +107,12 @@ let sessions: Session[] = [
 ];
 
 class DataService {
+    private autoDeleteLogs: string[] = [];
+
+    getAutoDeleteLogs() {
+        return this.autoDeleteLogs;
+    }
+
     // --- Admin Features ---
     createDoctor(data: {
         name: string;
@@ -136,10 +143,28 @@ class DataService {
         return sessions.filter(s => s.therapistId === doctorId);
     }
 
-    updateSessionDetails(sessionId: string, details: Partial<Session>) {
+    async updateSessionDetails(sessionId: string, details: Partial<Session>) {
         const idx = sessions.findIndex(s => s.id === sessionId);
         if (idx > -1) {
             sessions[idx] = { ...sessions[idx], ...details };
+            
+            if (details.status === 'scheduled') {
+                await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "Appointment Accepted! 🎉",
+                        body: `Dr. ${sessions[idx].therapistName} has accepted your appointment.`,
+                    },
+                    trigger: null,
+                });
+            } else if (details.status === 'rejected' || details.status === 'canceled') {
+                await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "Appointment Update",
+                        body: `Your session with Dr. ${sessions[idx].therapistName} was ${details.status}.`,
+                    },
+                    trigger: null,
+                });
+            }
         }
     }
 
@@ -216,7 +241,7 @@ class DataService {
             patientTopics: patient.topics || [],
             date,
             time,
-            status: 'scheduled'
+            status: 'pending'
         };
         sessions.push(newSession);
         return newSession;
@@ -247,8 +272,26 @@ class DataService {
         sessions = sessions.filter(s => s.date >= thirtyDaysAgo);
 
         if (sessions.length < initialCount) {
-            console.log(`[Auto-Delete] Permanently removed ${initialCount - sessions.length} sessions older than 30 days.`);
+            const count = initialCount - sessions.length;
+            const logMsg = `[${new Date().toLocaleString()}] CRON: Permanently removed ${count} sessions older than 30 days.`;
+            console.log(logMsg);
+            this.autoDeleteLogs.push(logMsg);
         }
+    }
+
+    getSystemAnalytics() {
+        const patients = users.filter(u => u.role === 'patient').length;
+        const doctors = users.filter(u => u.role === 'doctor').length;
+        const completed = sessions.filter(s => s.status === 'completed').length;
+        const canceled = sessions.filter(s => s.status === 'canceled').length;
+        // Mock revenue: 1500 per completed session
+        const revenue = completed * 1500;
+        
+        return {
+            users: { total: users.length, patients, doctors },
+            sessions: { total: sessions.length, completed, canceled },
+            revenue: { total: `₹${(revenue/1000)}K`, lastMonth: `₹${(revenue * 0.4 / 1000).toFixed(1)}K`, lastWeek: `₹${(revenue * 0.1 / 1000).toFixed(1)}K` }
+        };
     }
 
     // Help for auth (mimic login)

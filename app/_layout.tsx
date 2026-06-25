@@ -1,5 +1,16 @@
 import { Stack } from "expo-router";
 import { Platform, LogBox } from "react-native";
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 // Ignore the LogBox warning
 LogBox.ignoreLogs(['props.pointerEvents is deprecated']);
