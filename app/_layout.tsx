@@ -50,14 +50,12 @@ if (Platform.OS === 'web') {
 export default function RootLayout() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      <View style={{ flex: 1, width: '100%', maxWidth: 1024, alignSelf: 'center', overflow: 'hidden' }}>
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(patient)" options={{ headerShown: false }} />
-          <Stack.Screen name="(doctor)" options={{ headerShown: false }} />
-          <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-        </Stack>
-      </View>
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(patient)" options={{ headerShown: false }} />
+        <Stack.Screen name="(doctor)" options={{ headerShown: false }} />
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+      </Stack>
     </View>
   );
 }
